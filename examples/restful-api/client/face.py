@@ -5,7 +5,7 @@ import os
 from client import API_URL
 
 
-MAX_RETRIES = 20
+MAX_RETRIES = 30
 
 
 # def detect_by_url():
@@ -51,28 +51,69 @@ def detect_by_file(filename):
 
 
 def feature_by_file(filename):
+    # data = open(filename, 'rb').read()
+    # response = requests.post(url=API_URL + "/face/api/v1.0/feature",
+    #                          data=data,
+    #                          headers={'Content-Type': 'application/octet-stream'})
+    # print('feature_by_file ', response.json())
+    # return response.json()
+    print('-----', filename)
     data = open(filename, 'rb').read()
-    response = requests.post(url=API_URL + "/face/api/v1.0/feature",
-                             data=data,
-                             headers={'Content-Type': 'application/octet-stream'})
+
+    session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
+    session.mount('https://', adapter)
+    session.mount('http://', adapter)
+
+    response = session.post(url=API_URL + "/face/api/v1.0/feature",
+                            data=data,
+                            headers={'Content-Type': 'application/octet-stream'})
     print('feature_by_file ', response.json())
     return response.json()
 
 
 def identify_by_file(filename):
+    """
+    使用session 修复错误：requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response',))
+    :param filename:
+    :return:
+    """
+    # data = open(filename, 'rb').read()
+    # response = requests.post(url=API_URL + "/face/api/v1.0/identify",
+    #                          data=data,
+    #                          headers={'Content-Type': 'application/octet-stream'})
+    # print('identify_by_file ', response.json())
+    # return response.json()
     data = open(filename, 'rb').read()
-    response = requests.post(url=API_URL + "/face/api/v1.0/identify",
-                             data=data,
-                             headers={'Content-Type': 'application/octet-stream'})
+
+    session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
+    session.mount('https://', adapter)
+    session.mount('http://', adapter)
+
+    print('$ ', filename)
+    response = session.post(url=API_URL + "/face/api/v1.0/identify",
+                            data=data,
+                            headers={'Content-Type': 'application/octet-stream'})
     print('identify_by_file ', response.json())
     return response.json()
 
 
 def create_face(face_id, face_feature):
-    response = requests.post(url=API_URL + "/face/api/v1.0/faces",
-                             data='{"faceId":"%s", "faceFeature":"%s"}' % (face_id, face_feature),
-                             headers={'Content-Type': 'application/json'})
-    print('create_face ', response.json())
+    # response = requests.post(url=API_URL + "/face/api/v1.0/faces",
+    #                          data='{"faceId":"%s", "faceFeature":"%s"}' % (face_id, face_feature),
+    #                          headers={'Content-Type': 'application/json'})
+    # print('create_face ', response.json())
+    # return response.json()
+    session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
+    session.mount('https://', adapter)
+    session.mount('http://', adapter)
+
+    response = session.post(url=API_URL + "/face/api/v1.0/faces",
+                            data='{"faceId":"%s", "faceFeature":"%s"}' % (face_id, face_feature),
+                            headers={'Content-Type': 'application/json'})
+    print('identify_by_file ', response.json())
     return response.json()
 
 
@@ -96,6 +137,8 @@ def get_face_dataset():
     for face_path in faces_path:
         files = []
         for file in os.listdir(face_path):
+            if file == '.DS_Store':
+                continue
             files.append(os.path.join(face_path, file))
 
         name = os.path.basename(face_path)
