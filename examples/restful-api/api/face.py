@@ -196,7 +196,7 @@ def identify_face_id(face_encoding, id_features):
         face_ids.append(id)
         face_encodings.append(encoding)
 
-    results = face_recognition.compare_faces(face_encodings, face_encoding, tolerance=0.5)
+    results = face_recognition.compare_faces(face_encodings, face_encoding, tolerance=0.55)
 
     for index, result in enumerate(results):
         if result:
